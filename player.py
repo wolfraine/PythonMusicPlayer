@@ -1,57 +1,61 @@
-from tkinter.constants import ACTIVE, END, RAISED
+from tkinter.constants import ACTIVE, END, LEFT, RAISED
 import tkinter as tk #module to create grapgic interface
 from tkinter import filedialog
-import vlc 
 import time 
 from tinytag import TinyTag, TinyTagException 
-
+import pygame
 
 # graphic 
 root = tk.Tk()
-root.title("Python Simple Player")
-root.geometry("600x500") #podstawowy rozmiar okna
+root.title("Python Simple Player") # Title of window
+root.geometry("600x500") #basic size of window
+
+global paused #global value for pausing of file 
+paused = False
+
+#init pygame
+pygame.mixer.init()
 
 #List of audio files
 fileListFrame = tk.Listbox(root, bg="aqua", fg="green", width=60)
 fileListFrame.pack(pady=20)
 
 #box to print audioFile tag's
-audioTagBox = tk.Listbox(root, bg="white", fg="green", width=60)
+audioTagBox = tk.Listbox(root, fg="green", width=60)
 audioTagBox.pack(pady=20)
 
-# zmienna która przechowuje adres i nazwę pliku muzycznego
-file='Alex2.mp3'
+var = tk.StringVar()  #value of label audioTagBox
+tagDefvalue = 'Title: ' + '\n' + 'Author: ' + '\n' + 'Album author: ' +'\n' + 'Genre:' +'\n' + 'Time: ' 
+var.set(tagDefvalue)
 
-#class to use to chandle player
-class music_Player():
-    def __init__(self, audio_file):
-    # creating a vlc instance
-        vlc_instance = vlc.Instance()
-    # creating a media player
-        self.player = vlc_instance.media_player_new()
-    # creating a media
-        media = vlc_instance.media_new(audio_file)
-    # setting media to the player
-        self.player.set_media(media)
+def btn_play(): #def play
+    song = fileListFrame.get(ACTIVE)
+    #song = f'C:\Users\Łukasz\Desktop\Python\PythonMusicPlayer\audio/{song}.mp3'
+    var.set(music_tag(song))    
     
-    def btn_play(self): #def play
-        song = fileListFrame.get(ACTIVE)
-        audio =music_Player(song)
-        self.player.play()
+    pygame.mixer.music.load(song)
+    pygame.mixer.music.play(loops=0)
     
-    def btn_pause(self): #def pauzy
-        self.player.pause()
+def btn_pause(is_paused): #def pauzy
+    global paused
+    paused = is_paused
+    if paused==True:
+        pygame.mixer.music.unpause()
+        paused = False
+    else:
+        pygame.mixer.music.pause()
+        paused = True
     
-    def btn_stop(self): #def stopu
-        self.player.stop()
+def btn_stop(): #def stopu
+    pygame.mixer.music.stop()
+    fileListFrame.selection_clear(ACTIVE)
+    var.set(tagDefvalue)
 
-    def btn_next(self):
-        pass
+def btn_next():
+    pass
 
-    def btn_prev(self):
-        pass
-
-audio =music_Player(file)
+def btn_prev():
+    pass
 
 #Audio files tag's
 def music_tag(song_file):
@@ -60,7 +64,7 @@ def music_tag(song_file):
         'Album author: %s.' % tag.albumartist +'\n' + 'Genre: %s.' % tag.genre +'\n' + 'Time: %s.' % time.strftime('%H:%M:%S', time.gmtime(tag.duration))
 
 def songtime(song_file): #return length of audio file in seconds
-    tag = TinyTag.get(file)
+    tag = TinyTag.get(song_file)
     return tag.duration
 
 def add_song():
@@ -68,9 +72,9 @@ def add_song():
     fileListFrame.insert(END, song)
 
 #print tags -> add command to print info on click on file ?
-var = tk.StringVar()
-label_music_tag = tk.Label(master=audioTagBox, textvariable=var, relief=RAISED)
-var.set(music_tag(file))
+
+label_music_tag = tk.Label(master=audioTagBox, textvariable=var, relief=RAISED, justify=LEFT, width=45, anchor='w', bg='white')
+#var.set(music_tag('Alex2.mp3'))
 label_music_tag.pack()
 
 
@@ -79,11 +83,11 @@ controlFrame = tk.Frame(root)
 controlFrame.pack(pady= 10)
 
 #button description
-button_play = tk.Button(controlFrame, text="Play", command=audio.btn_play)
-button_pause = tk.Button(controlFrame, text="Pause", command=audio.btn_pause)
-button_stop = tk.Button(controlFrame, text="Stop", command=audio.btn_stop)
-button_prev = tk.Button(controlFrame, text="<<", command=audio.btn_prev) 
-button_next = tk.Button(controlFrame, text=">>", command=audio.btn_next) 
+button_play = tk.Button(controlFrame, text="Play", command=btn_play)
+button_pause = tk.Button(controlFrame, text="Pause", command=lambda: btn_pause(paused))
+button_stop = tk.Button(controlFrame, text="Stop", command=btn_stop)
+button_prev = tk.Button(controlFrame, text="<<", command=btn_prev) 
+button_next = tk.Button(controlFrame, text=">>", command=btn_next) 
 
 #button position
 button_prev.grid(row=0, column=0)
