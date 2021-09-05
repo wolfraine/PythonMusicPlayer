@@ -1,4 +1,4 @@
-from tkinter.constants import ACTIVE, END, LEFT, RAISED
+from tkinter.constants import ACTIVE, END, FIRST, LAST, LEFT, RAISED
 import tkinter as tk #module to create grapgic interface
 from tkinter import filedialog
 import time 
@@ -25,12 +25,11 @@ audioTagBox = tk.Listbox(root, fg="green", width=60)
 audioTagBox.pack(pady=20)
 
 var = tk.StringVar()  #value of label audioTagBox
-tagDefvalue = 'Title: ' + '\n' + 'Author: ' + '\n' + 'Album author: ' +'\n' + 'Genre:' +'\n' + 'Time: ' 
+tagDefvalue = 'Title: ' + '\n' + 'Author: ' + '\n' + 'Album: ' +'\n' + 'Genre:' +'\n' + 'Time: ' 
 var.set(tagDefvalue)
 
 def btn_play(): #def play
     song = fileListFrame.get(ACTIVE)
-    #song = f'C:\Users\Łukasz\Desktop\Python\PythonMusicPlayer\audio/{song}.mp3'
     var.set(music_tag(song))    
     
     pygame.mixer.music.load(song)
@@ -54,9 +53,15 @@ def btn_stop(): #def stopu
 def btn_next():
     next_file = fileListFrame.curselection()
     next_file = next_file[0] + 1
+
+    #if next_file is end index, then after click on next button index is set to first position
+    if next_file == fileListFrame.index(END):
+        next_file = fileListFrame.index(0)
+
     # grab file title from playlist
     song = fileListFrame.get(next_file)
     #load file and play
+    var.set(music_tag(song))
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops=0)
     #move active bar in playlist
@@ -68,9 +73,15 @@ def btn_next():
 def btn_prev():
     next_file = fileListFrame.curselection()
     next_file = next_file[0] - 1
+
+    #if next_file is first index, then after click on prev button, index is set to END position
+    if next_file == fileListFrame.index(-1):
+        next_file = (fileListFrame.index(END) - 1)
+
     # grab file title from playlist
     song = fileListFrame.get(next_file)
     #load file and play
+    var.set(music_tag(song))
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops=0)
     #move active bar in playlist
@@ -81,8 +92,8 @@ def btn_prev():
 #Audio files tag's
 def music_tag(song_file):
     tag = TinyTag.get(song_file)
-    return 'Title: %s.' % tag.title + '\n' + 'Author: %s.' % tag.artist +'\n' + \
-        'Album author: %s.' % tag.albumartist +'\n' + 'Genre: %s.' % tag.genre +'\n' + 'Time: %s.' % time.strftime('%H:%M:%S', time.gmtime(tag.duration))
+    return 'Title:      %s.' % tag.title + '\n' + 'Author: %s.' % tag.artist +'\n' + \
+        'Album: %s.' % tag.album +'\n' + 'Genre:  %s.' % tag.genre +'\n' + 'Time:    %s.' % time.strftime('%H:%M:%S', time.gmtime(tag.duration))
 
 def songtime(song_file): #return length of audio file in seconds
     tag = TinyTag.get(song_file)
@@ -130,6 +141,6 @@ file_menu.add_command(label = "Exit")
 #add song menu
 player_menu = tk.Menu(my_menu)
 my_menu.add_cascade(label = "Add song/songs", menu = player_menu)
-player_menu.add_command(label = "Add one Song to Playlist",command=add_song)
-player_menu.add_command(label = "Add many Songs to Playlist",command=add_songs)
+player_menu.add_command(label = "Add one Song to Playlist", command=add_song)
+player_menu.add_command(label = "Add many Songs to Playlist", command=add_songs)
 root.mainloop()
