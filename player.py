@@ -151,11 +151,11 @@ button_next.grid(row=0, column=4)
 
 #create volume slider
 volumeSlider = ttk.Scale(volumeFrame, from_=1, to=0, orient=VERTICAL, command=volume, length=125, value=1)
-volumeSlider.grid(row=0, column=0, pady=10)
+volumeSlider.pack()
 
-#test slider
+#create volume value slider
 sliderLabel = tk.Label(volumeFrame, text="100", anchor="w")
-sliderLabel.grid(row=1, column=0)
+sliderLabel.pack()
 
 my_menu = tk.Menu(root)
 root.config(menu=my_menu)
@@ -170,4 +170,7 @@ player_menu = tk.Menu(my_menu)
 my_menu.add_cascade(label = "Add song/songs", menu = player_menu)
 player_menu.add_command(label = "Add one Song to Playlist", command=add_song)
 player_menu.add_command(label = "Add many Songs to Playlist", command=add_songs)
+
+file_menu = tk.Menu(my_menu)
+
 root.mainloop()
