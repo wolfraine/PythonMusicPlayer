@@ -1,5 +1,6 @@
-from tkinter.constants import ACTIVE, END, FIRST, LAST, LEFT, RAISED
+from tkinter.constants import ACTIVE, ANCHOR, END, FIRST, LAST, LEFT, RAISED, VERTICAL, W
 import tkinter as tk #module to create grapgic interface
+from tkinter import ttk
 from tkinter import filedialog
 import time 
 from tinytag import TinyTag, TinyTagException 
@@ -16,13 +17,20 @@ paused = False
 #init pygame
 pygame.mixer.init()
 
+#Create master Frame
+masterFrame = tk.Frame(root)
+masterFrame.pack(pady=20)
+
+volumeFrame = tk.LabelFrame(masterFrame, text="Volume", )
+volumeFrame.grid(row=0, column=1, padx=20)
+
 #List of audio files
-fileListFrame = tk.Listbox(root, bg="aqua", fg="green", width=60)
-fileListFrame.pack(pady=20)
+fileListFrame = tk.Listbox(masterFrame, bg="aqua", fg="green", width=60)
+fileListFrame.grid(row=0, column=0)
 
 #box to print audioFile tag's
-audioTagBox = tk.Listbox(root, fg="green", width=60)
-audioTagBox.pack(pady=20)
+audioTagBox = tk.Listbox(masterFrame, fg="green", width=60)
+audioTagBox.grid(row=1, column=0, pady=20)
 
 var = tk.StringVar()  #value of label audioTagBox
 tagDefvalue = 'Title: ' + '\n' + 'Author: ' + '\n' + 'Album: ' +'\n' + 'Genre:' +'\n' + 'Time: ' 
@@ -35,7 +43,12 @@ def btn_play(): #def play
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops=0)
     
-def btn_pause(is_paused): #def pauzy
+    #Print actual value of volume
+    currentVolume = pygame.mixer.music.get_volume() * 100
+    sliderLabel.config(text = "%.0f" % currentVolume)
+
+
+def btn_pause(is_paused): #def pause
     global paused
     paused = is_paused
     if paused==True:
@@ -108,13 +121,18 @@ def add_songs():
     for song in songs:
         fileListFrame.insert(END, song)
 
+def volume(x):
+    pygame.mixer.music.set_volume(volumeSlider.get())
+    currentVolume = pygame.mixer.music.get_volume() * 100
+    sliderLabel.config(text = "%.0f" % currentVolume)
+
 #tags print label
 label_music_tag = tk.Label(master=audioTagBox, textvariable=var, relief=RAISED, justify=LEFT, width=45, anchor='w', bg='white')
 label_music_tag.pack()
 
 #create panel control button
-controlFrame = tk.Frame(root)
-controlFrame.pack(pady= 10)
+controlFrame = tk.Frame(masterFrame)
+controlFrame.grid(row=2, column=0)
 
 #button description
 button_play = tk.Button(controlFrame, text="Play", command=btn_play)
@@ -122,13 +140,22 @@ button_pause = tk.Button(controlFrame, text="Pause", command=lambda: btn_pause(p
 button_stop = tk.Button(controlFrame, text="Stop", command=btn_stop)
 button_prev = tk.Button(controlFrame, text="<<", command=btn_prev) 
 button_next = tk.Button(controlFrame, text=">>", command=btn_next) 
-
+  
 #button position
 button_prev.grid(row=0, column=0)
 button_stop.grid(row=0, column=1)
 button_play.grid(row=0, column=2)
 button_pause.grid(row=0, column=3)
 button_next.grid(row=0, column=4)
+
+
+#create volume slider
+volumeSlider = ttk.Scale(volumeFrame, from_=1, to=0, orient=VERTICAL, command=volume, length=125, value=1)
+volumeSlider.grid(row=0, column=0, pady=10)
+
+#test slider
+sliderLabel = tk.Label(volumeFrame, text="100", anchor="w")
+sliderLabel.grid(row=1, column=0)
 
 my_menu = tk.Menu(root)
 root.config(menu=my_menu)
