@@ -1,36 +1,52 @@
 from tkinter.constants import ACTIVE, ANCHOR, END, FIRST, LAST, LEFT, RAISED, VERTICAL, W
 import tkinter as tk #module to create grapgic interface
-from tkinter import ttk
+from tkinter import PhotoImage, ttk
 from tkinter import filedialog
 import time 
 from tinytag import TinyTag, TinyTagException 
 import pygame
+from PIL import ImageTk, Image
 
 # graphic 
 root = tk.Tk()
 root.title("Python Simple Player") # Title of window
-root.geometry("600x500") #basic size of window
-
+root.geometry("550x450") #basic size of window
+root.wm_attributes('-transparentcolor', '#ab23ff')
 global paused #global value for pausing of file 
-paused = False
+paused = False 
 
+
+bg = PhotoImage(file = "foto1.png")
+
+#=====================================================
+#img = ImageTk.PhotoImage(Image.open('foto1.png').resize((550, 450), Image.ANTIALIAS))
+#lbl = tk.Label(root, image=img)
+#lbl.img = img  # Keep a reference in case this code put is in a function.
+#lbl.place(relx=0.5, rely=0.5, anchor='center')  # Place label in center of parent.
+
+
+#========================================================
 #init pygame
 pygame.mixer.init()
 
 #Create master Frame
-masterFrame = tk.Frame(root)
-masterFrame.pack(pady=20)
-
-volumeFrame = tk.LabelFrame(masterFrame, text="Volume", )
-volumeFrame.grid(row=0, column=1, padx=20)
+masterFrame = tk.Label(root)
+masterFrame.pack(pady=30, anchor='center')
 
 #List of audio files
 fileListFrame = tk.Listbox(masterFrame, bg="aqua", fg="green", width=60)
-fileListFrame.grid(row=0, column=0)
+fileListFrame.grid(row=0, column=0, columnspan=2)
+
+#button for AudioList
+fileListButton = tk.Frame(masterFrame, bg="blue")
+fileListButton.grid(row=1, column=0, columnspan=2, pady=5)
 
 #box to print audioFile tag's
-audioTagBox = tk.Listbox(masterFrame, fg="green", width=60)
-audioTagBox.grid(row=1, column=0, pady=20)
+audioTagBox = tk.Listbox(masterFrame, fg="green")
+audioTagBox.grid(row=2, column=0, pady=10)
+
+volumeFrame = tk.LabelFrame(masterFrame, text="Volume")
+volumeFrame.grid(row=2, column=1, padx=20)
 
 var = tk.StringVar()  #value of label audioTagBox
 tagDefvalue = 'Title: ' + '\n' + 'Author: ' + '\n' + 'Album: ' +'\n' + 'Genre:' +'\n' + 'Time: ' 
@@ -132,7 +148,7 @@ label_music_tag.pack()
 
 #create panel control button
 controlFrame = tk.Frame(masterFrame)
-controlFrame.grid(row=2, column=0)
+controlFrame.grid(row=3, column=0, columnspan=2)
 
 #button description
 button_play = tk.Button(controlFrame, text="Play", command=btn_play)
@@ -140,7 +156,9 @@ button_pause = tk.Button(controlFrame, text="Pause", command=lambda: btn_pause(p
 button_stop = tk.Button(controlFrame, text="Stop", command=btn_stop)
 button_prev = tk.Button(controlFrame, text="<<", command=btn_prev) 
 button_next = tk.Button(controlFrame, text=">>", command=btn_next) 
-  
+
+button_add = tk.Button(fileListButton, text="+", command=add_songs)
+button_remove = tk.Button(fileListButton, text="-")
 #button position
 button_prev.grid(row=0, column=0)
 button_stop.grid(row=0, column=1)
@@ -148,9 +166,12 @@ button_play.grid(row=0, column=2)
 button_pause.grid(row=0, column=3)
 button_next.grid(row=0, column=4)
 
+#button position in fileListButton
+button_add.grid(row=0, column=0, padx=5)
+button_remove.grid(row=0, column=1, padx=5)
 
 #create volume slider
-volumeSlider = ttk.Scale(volumeFrame, from_=1, to=0, orient=VERTICAL, command=volume, length=125, value=1)
+volumeSlider = ttk.Scale(volumeFrame, from_=1, to=0, orient=VERTICAL, command=volume, length=45, value=1)
 volumeSlider.pack()
 
 #create volume value slider
@@ -171,6 +192,6 @@ my_menu.add_cascade(label = "Add song/songs", menu = player_menu)
 player_menu.add_command(label = "Add one Song to Playlist", command=add_song)
 player_menu.add_command(label = "Add many Songs to Playlist", command=add_songs)
 
-file_menu = tk.Menu(my_menu)
+
 
 root.mainloop()
