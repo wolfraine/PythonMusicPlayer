@@ -1,4 +1,4 @@
-from tkinter.constants import ACTIVE, ANCHOR, BOTH, END, FIRST, LAST, LEFT, RAISED, RIGHT, TOP, VERTICAL, W
+from tkinter.constants import ACTIVE, ANCHOR, BOTH, E, END, FIRST, GROOVE, LAST, LEFT, RAISED, RIGHT, TOP, VERTICAL, W
 import tkinter as tk #module to create grapgic interface
 from tkinter import ttk, filedialog, PhotoImage
 import time
@@ -46,9 +46,24 @@ audioTagBox.grid(row=2, column=0, pady=20, padx=10)
 volumeFrame = tk.LabelFrame(masterFrame, text="Volume")
 volumeFrame.grid(row=2, column=1)
 
+#========================================================================
+#Status Bar to continue !
+status_bar = tk.Label(masterFrame, text='', bd=1, relief=GROOVE, anchor=E)
+status_bar.grid(row=4, column=0, ipady=2)
+#========================================================================
+
+
+#create panel control button
+controlFrame = tk.Frame(masterFrame)
+controlFrame.grid(row=4, column=0, columnspan=2)
+
 var = tk.StringVar()  #value of label audioTagBox
 tagDefvalue = 'Title: ' + '\n' + 'Author: ' + '\n' + 'Album: ' +'\n' + 'Genre:' +'\n' + 'Time: ' 
 var.set(tagDefvalue)
+
+#tags print label
+label_music_tag = tk.Label(master=audioTagBox, textvariable=var, relief=RAISED, justify=LEFT, width=45, anchor='w', bg='white')
+label_music_tag.pack()
 
 def btn_play(): #def play
     song = fileListFrame.get(ACTIVE)
@@ -146,14 +161,6 @@ def volume(x):
     currentVolume = pygame.mixer.music.get_volume() * 100
     sliderLabel.config(text = "%.0f" % currentVolume)
 
-#tags print label
-label_music_tag = tk.Label(master=audioTagBox, textvariable=var, relief=RAISED, justify=LEFT, width=45, anchor='w', bg='white')
-label_music_tag.pack()
-
-#create panel control button
-controlFrame = tk.Frame(masterFrame)
-controlFrame.grid(row=3, column=0, columnspan=2)
-
 #button description
 button_play = tk.Button(controlFrame, text="Play", command=btn_play)
 button_pause = tk.Button(controlFrame, text="Pause", command=lambda: btn_pause(paused))
@@ -171,8 +178,8 @@ button_pause.grid(row=0, column=3)
 button_next.grid(row=0, column=4)
 
 #button position in fileListButton
-button_add.grid(row=0, column=0, padx=5)
-button_remove.grid(row=0, column=1, padx=5)
+button_add.grid(row=0, column=0)
+button_remove.grid(row=0, column=1)
 
 #create volume slider
 volumeSlider = ttk.Scale(volumeFrame, from_=1, to=0, orient=VERTICAL, command=volume, length=45, value=1)
@@ -198,7 +205,7 @@ player_menu.add_command(label = "Add many Songs to Playlist", command=add_songs)
 
 #remove song menu
 remove_menu = tk.Menu(my_menu, tearoff=0)
-my_menu.add_cascade(label="Remove song/songs", menu=remove_menu)
+my_menu.add_cascade(label="Remove", menu=remove_menu)
 remove_menu.add_command(label="Remove Song", command=remove_song)
 remove_menu.add_command(label="Clear list of songs", command=clear_fileList)
 
