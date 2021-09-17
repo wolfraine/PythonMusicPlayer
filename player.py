@@ -70,7 +70,7 @@ def btn_play(): #def play
     currentVolume = pygame.mixer.music.get_volume() * 100
     sliderLabel.config(text = "%.0f" % currentVolume)
 
-    song_play_time()
+    song_play_time(song)
 
 def btn_pause(is_paused): #def pause
     global paused
@@ -97,7 +97,7 @@ def btn_next():
 
     # grab file title from playlist
     song = fileListFrame.get(next_file)
-    song_play_time()
+    song_play_time(song)
     #load file and play
     var.set(music_tag(song))
     pygame.mixer.music.load(song)
@@ -118,7 +118,7 @@ def btn_prev():
 
     # grab file title from playlist
     song = fileListFrame.get(next_file)
-    song_play_time()
+    song_play_time(song)
     #load file and play
     var.set(music_tag(song))
     pygame.mixer.music.load(song)
@@ -138,18 +138,19 @@ def song_time(song_file):
     tag = TinyTag.get(song_file)
     return time.strftime('%H:%M:%S', time.gmtime(tag.duration))
 
-def song_play_time(): 
+def song_play_time(song):
+    song_file = song
     current_position = pygame.mixer.music.get_pos() /1000
     #convert seconds to format hour:minute:second 
     converted_time = time.strftime('%H:%M:%S', time.gmtime(current_position))
-    #grab and get current song file
-    song = fileListFrame.get(ACTIVE)
-    song_duration = song_time(song)
+    #get current song file
+    song_duration = song_time(song_file)
     #Output time to status bar
     status_bar.config(text = f"Time Elapsed {converted_time} of {song_duration}.")
     #update time if music isn't stopped
     if pygame.mixer.music.get_pos() != -1:
-        status_bar.after(500, song_play_time)
+        pass
+        status_bar.after(500, song_play_time())
     else:
         status_bar.config(text = f"Time Elapsed 00:00:00 of 00:00:00.")
 
