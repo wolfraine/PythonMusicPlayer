@@ -1,4 +1,4 @@
-from tkinter.constants import ACTIVE, ANCHOR, BOTH, E, END, FIRST, GROOVE, LAST, LEFT, RAISED, RIGHT, TOP, VERTICAL, W
+from tkinter.constants import ACTIVE, BOTH, BOTTOM, E, END, GROOVE,  LEFT, RAISED,  VERTICAL, X
 import tkinter as tk #module to create grapgic interface
 from tkinter import ttk, filedialog, PhotoImage
 import time
@@ -6,11 +6,12 @@ from typing import Any
 from tinytag import TinyTag, TinyTagException 
 import pygame
 from PIL import ImageTk, Image
+import tinytag
 
 # graphic 
 root = tk.Tk()
 root.title("Python Simple Player") # Title of window
-root.geometry("500x450") #basic size of window
+root.geometry("500x480") #basic size of window
 
 #root.iconbitmap('icon.ico') dont work for me 
 img_icon = PhotoImage(file='icon.png')
@@ -46,13 +47,6 @@ audioTagBox.grid(row=2, column=0, pady=20, padx=10)
 volumeFrame = tk.LabelFrame(masterFrame, text="Volume")
 volumeFrame.grid(row=2, column=1)
 
-#========================================================================
-#Status Bar to continue !
-status_bar = tk.Label(masterFrame, text='', bd=1, relief=GROOVE, anchor=E)
-status_bar.grid(row=4, column=0, ipady=2)
-#========================================================================
-
-
 #create panel control button
 controlFrame = tk.Frame(masterFrame)
 controlFrame.grid(row=4, column=0, columnspan=2)
@@ -76,6 +70,7 @@ def btn_play(): #def play
     currentVolume = pygame.mixer.music.get_volume() * 100
     sliderLabel.config(text = "%.0f" % currentVolume)
 
+    song_play_time()
 
 def btn_pause(is_paused): #def pause
     global paused
@@ -137,9 +132,23 @@ def music_tag(song_file):
     return 'Title:      %s.' % tag.title + '\n' + 'Author: %s.' % tag.artist +'\n' + \
         'Album: %s.' % tag.album +'\n' + 'Genre:  %s.' % tag.genre +'\n' + 'Time:    %s.' % time.strftime('%H:%M:%S', time.gmtime(tag.duration))
 
-def songtime(song_file): #return length of audio file in seconds
+def song_time(song_file):
     tag = TinyTag.get(song_file)
-    return tag.duration
+    return time.strftime('%H:%M:%S', time.gmtime(tag.duration))
+
+def song_play_time(): 
+    current_position = pygame.mixer.music.get_pos() /1000
+    #convert seconds to format hour:minute:second 
+    converted_time = time.strftime('%H:%M:%S', time.gmtime(current_position))
+
+    #grab and get current song file
+    song = fileListFrame.get(ACTIVE)
+    song_duration = song_time(song)
+    #Output time to status bar
+    status_bar.config(text = f"Time Elapsed {converted_time} of {song_duration}")
+    #update time
+    status_bar.after(500, song_play_time)
+    
 
 def add_song():
     song = filedialog.askopenfilename(initialdir='audio/', title="Choose song", filetypes=(("mp3 Files", "*.mp3"), ))
@@ -187,8 +196,13 @@ volumeSlider.pack()
 
 #create volume value slider
 sliderLabel = tk.Label(volumeFrame, text="100", anchor="w")
-sliderLabel.pack()
+sliderLabel.pack(fill=X, side=BOTTOM, ipady=2)
 
+status_bar = tk.Label(root, text='',border=1, relief=GROOVE)
+status_bar.pack(anchor=tk.E)
+
+#=================================================================================================================
+#                  MENU PART
 my_menu = tk.Menu(root)
 root.config(menu=my_menu)
 
@@ -199,7 +213,7 @@ file_menu.add_command(label = "Exit", command=root.quit)
 
 #add song menu
 player_menu = tk.Menu(my_menu, tearoff=0)
-my_menu.add_cascade(label = "Add song/songs", menu = player_menu)
+my_menu.add_cascade(label = "Add song", menu = player_menu)
 player_menu.add_command(label = "Add one Song to Playlist", command=add_song)
 player_menu.add_command(label = "Add many Songs to Playlist", command=add_songs)
 
