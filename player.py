@@ -1,4 +1,4 @@
-from tkinter.constants import ACTIVE, BOTH, BOTTOM, E, END, GROOVE,  LEFT, RAISED,  VERTICAL, X
+from tkinter.constants import ACTIVE, BOTH, BOTTOM, END, GROOVE,  LEFT, RAISED,  VERTICAL, X
 import tkinter as tk #module to create grapgic interface
 from tkinter import ttk, filedialog, PhotoImage
 import time
@@ -97,6 +97,7 @@ def btn_next():
 
     # grab file title from playlist
     song = fileListFrame.get(next_file)
+    song_play_time()
     #load file and play
     var.set(music_tag(song))
     pygame.mixer.music.load(song)
@@ -117,6 +118,7 @@ def btn_prev():
 
     # grab file title from playlist
     song = fileListFrame.get(next_file)
+    song_play_time()
     #load file and play
     var.set(music_tag(song))
     pygame.mixer.music.load(song)
@@ -140,15 +142,16 @@ def song_play_time():
     current_position = pygame.mixer.music.get_pos() /1000
     #convert seconds to format hour:minute:second 
     converted_time = time.strftime('%H:%M:%S', time.gmtime(current_position))
-
     #grab and get current song file
     song = fileListFrame.get(ACTIVE)
     song_duration = song_time(song)
     #Output time to status bar
-    status_bar.config(text = f"Time Elapsed {converted_time} of {song_duration}")
-    #update time
-    status_bar.after(500, song_play_time)
-    
+    status_bar.config(text = f"Time Elapsed {converted_time} of {song_duration}.")
+    #update time if music isn't stopped
+    if pygame.mixer.music.get_pos() != -1:
+        status_bar.after(500, song_play_time)
+    else:
+        status_bar.config(text = f"Time Elapsed 00:00:00 of 00:00:00.")
 
 def add_song():
     song = filedialog.askopenfilename(initialdir='audio/', title="Choose song", filetypes=(("mp3 Files", "*.mp3"), ))
@@ -169,6 +172,8 @@ def volume(x):
     pygame.mixer.music.set_volume(volumeSlider.get())
     currentVolume = pygame.mixer.music.get_volume() * 100
     sliderLabel.config(text = "%.0f" % currentVolume)
+
+
 
 #button description
 button_play = tk.Button(controlFrame, text="Play", command=btn_play)
