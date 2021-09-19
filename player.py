@@ -1,4 +1,4 @@
-from tkinter.constants import ACTIVE, BOTH, BOTTOM, END, GROOVE,  LEFT, RAISED,  VERTICAL, X
+from tkinter.constants import ACTIVE, BOTH, BOTTOM, END, GROOVE, HORIZONTAL,  LEFT, RAISED,  VERTICAL, X
 import tkinter as tk #module to create grapgic interface
 from tkinter import ttk, filedialog, PhotoImage
 import time
@@ -6,7 +6,6 @@ from typing import Any
 from tinytag import TinyTag, TinyTagException 
 import pygame
 from PIL import ImageTk, Image
-import tinytag
 
 # graphic 
 root = tk.Tk()
@@ -60,17 +59,20 @@ label_music_tag = tk.Label(master=audioTagBox, textvariable=var, relief=RAISED, 
 label_music_tag.pack()
 
 def btn_play(): #def play
+    global paused
+    paused = False
     song = fileListFrame.get(ACTIVE)
     var.set(music_tag(song))    
     
     pygame.mixer.music.load(song)
-    pygame.mixer.music.play(loops=0)
-    
+    pygame.mixer.music.play(loops = 0)
+    #start option dont work for me, becouse of that i must use value 0 to set position on start
+    position_slider.config(value = 0)
     #Print actual value of volume
     currentVolume = pygame.mixer.music.get_volume() * 100
     sliderLabel.config(text = "%.0f" % currentVolume)
-
-    song_play_time(song)
+    
+    song_play_time()
 
 def btn_pause(is_paused): #def pause
     global paused
@@ -85,6 +87,7 @@ def btn_pause(is_paused): #def pause
 def btn_stop(): #def stopu
     pygame.mixer.music.stop()
     fileListFrame.selection_clear(ACTIVE)
+    position_slider.config(value = 0)
     var.set(tagDefvalue)
 
 def btn_next():
@@ -97,11 +100,11 @@ def btn_next():
 
     # grab file title from playlist
     song = fileListFrame.get(next_file)
-    song_play_time(song)
     #load file and play
     var.set(music_tag(song))
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops=0)
+    position_slider.config(value = 0)   
     #move active bar in playlist
     fileListFrame.select_clear(0, END)
     fileListFrame.activate(next_file)
@@ -118,11 +121,11 @@ def btn_prev():
 
     # grab file title from playlist
     song = fileListFrame.get(next_file)
-    song_play_time(song)
     #load file and play
     var.set(music_tag(song))
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops=0)
+    position_slider.config(value = 0)
     #move active bar in playlist
     fileListFrame.select_clear(0, END)
     fileListFrame.activate(next_file)
@@ -136,23 +139,38 @@ def music_tag(song_file):
 
 def song_time(song_file):
     tag = TinyTag.get(song_file)
-    return time.strftime('%H:%M:%S', time.gmtime(tag.duration))
+    return tag.duration
 
-def song_play_time(song):
-    song_file = song
-    current_position = pygame.mixer.music.get_pos() /1000
+def song_play_time():
+    current_position = pygame.mixer.music.get_pos() / 1000
     #convert seconds to format hour:minute:second 
     converted_time = time.strftime('%H:%M:%S', time.gmtime(current_position))
-    #get current song file
-    song_duration = song_time(song_file)
-    #Output time to status bar
-    status_bar.config(text = f"Time Elapsed {converted_time} of {song_duration}.")
-    #update time if music isn't stopped
-    if pygame.mixer.music.get_pos() != -1:
+    #grab and get current song file
+    song = fileListFrame.get(ACTIVE)
+    song_duration = time.strftime('%H:%M:%S', time.gmtime(song_time(song)))
+    current_position += 1
+    #status bar to stop on end of song
+    if int(position_slider.get()) == int(song_time(song)):
+        status_bar.config(text = f"Time Elapsed {song_duration} of {song_duration}.")
+
+    elif int(position_slider.get()) == int(current_position):
+        time_of_song = song_time(song)
+        position_slider.config(to=int(time_of_song), value = int(current_position))
+    
+    #pause for status bar
+    elif paused:
         pass
-        status_bar.after(500, song_play_time())
+    
     else:
-        status_bar.config(text = f"Time Elapsed 00:00:00 of 00:00:00.")
+        time_of_song = song_time(song)
+        position_slider.config(to=int(time_of_song), value = int(position_slider.get()))
+        converted_time = time.strftime('%H:%M:%S', time.gmtime(int(position_slider.get())))
+        #Output time to status bar
+        status_bar.config(text = f"Time Elapsed {converted_time} of {song_duration}.")
+        next_clock = int(position_slider.get()) + 1
+        position_slider.config(value = next_clock)
+    #update status bar 
+    status_bar.after(1000, song_play_time)
 
 def add_song():
     song = filedialog.askopenfilename(initialdir='audio/', title="Choose song", filetypes=(("mp3 Files", "*.mp3"), ))
@@ -174,7 +192,11 @@ def volume(x):
     currentVolume = pygame.mixer.music.get_volume() * 100
     sliderLabel.config(text = "%.0f" % currentVolume)
 
-
+def slide(x):
+    song = fileListFrame.get(ACTIVE)
+    pygame.mixer.music.load(song)
+    pygame.mixer.music.play(loops = 0, start = int(position_slider.get()))
+    
 
 #button description
 button_play = tk.Button(controlFrame, text="Play", command=btn_play)
@@ -200,8 +222,12 @@ button_remove.grid(row=0, column=1)
 volumeSlider = ttk.Scale(volumeFrame, from_=1, to=0, orient=VERTICAL, command=volume, length=45, value=1)
 volumeSlider.pack()
 
+#music position slider
+position_slider = ttk.Scale(masterFrame,from_=0, to=100, orient=HORIZONTAL, value=0, command= slide, length=380)
+position_slider.grid(row=3, column=0, columnspan=2)
+
 #create volume value slider
-sliderLabel = tk.Label(volumeFrame, text="100", anchor="w")
+sliderLabel = tk.Label(volumeFrame, text="100", anchor='center')
 sliderLabel.pack(fill=X, side=BOTTOM, ipady=2)
 
 status_bar = tk.Label(root, text='',border=1, relief=GROOVE)
