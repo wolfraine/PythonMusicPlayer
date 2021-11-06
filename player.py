@@ -2,8 +2,7 @@ from tkinter.constants import ACTIVE, BOTH, BOTTOM, END, GROOVE, HORIZONTAL,  LE
 import tkinter as tk #module to create grapgic interface
 from tkinter import ttk, filedialog, PhotoImage
 import time
-from typing import Any 
-from tinytag import TinyTag, TinyTagException 
+from tinytag import TinyTag
 import pygame
 from PIL import ImageTk, Image
 
@@ -88,6 +87,7 @@ def btn_stop(): #def stopu
     pygame.mixer.music.stop()
     fileListFrame.selection_clear(ACTIVE)
     position_slider.config(value = 0)
+    status_bar.config(text = f"")
     var.set(tagDefvalue)
 
 def btn_next():
@@ -197,6 +197,24 @@ def slide(x):
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops = 0, start = int(position_slider.get()))
     
+def save_tracklist():
+    file = open("audio/tracklist.spp", "w")
+    track_lenght = int(fileListFrame.index(END))
+
+    for i in range(0, track_lenght, 1):
+        file.write(fileListFrame.get(i) + '\n')
+    file.close()
+
+def save_tracklist_as():
+    pass
+
+def open_tracklist():
+    #trackL contain file name, to read from file you need to open file
+    trackL = filedialog.askopenfilename(initialdir='audio/', title="Choose tracklist", filetypes=(("tracklist", "*.spp"), ))
+    with open(trackL) as file:
+        for line in file:
+            fileListFrame.insert(END, line.rstrip("\n")) # on end of line is enter, to play song you must remove him
+
 
 #button description
 button_play = tk.Button(controlFrame, text="Play", command=btn_play)
@@ -241,18 +259,21 @@ root.config(menu=my_menu)
 #file menu
 file_menu = tk.Menu(my_menu, tearoff=0)
 my_menu.add_cascade(label = "File", menu = file_menu)
+file_menu.add_command(label = "Open tracklist", command=open_tracklist)
+file_menu.add_command(label = "Save tracklist", command = save_tracklist)
+file_menu.add_command(label = "Save tracklist as", command = save_tracklist_as)
 file_menu.add_command(label = "Exit", command=root.quit)
 
 #add song menu
 player_menu = tk.Menu(my_menu, tearoff=0)
 my_menu.add_cascade(label = "Add song", menu = player_menu)
-player_menu.add_command(label = "Add one Song to Playlist", command=add_song)
-player_menu.add_command(label = "Add many Songs to Playlist", command=add_songs)
+player_menu.add_command(label = "Add one Song to Playlist", command = add_song)
+player_menu.add_command(label = "Add many Songs to Playlist", command = add_songs)
 
 #remove song menu
-remove_menu = tk.Menu(my_menu, tearoff=0)
-my_menu.add_cascade(label="Remove", menu=remove_menu)
-remove_menu.add_command(label="Remove Song", command=remove_song)
-remove_menu.add_command(label="Clear list of songs", command=clear_fileList)
+remove_menu = tk.Menu(my_menu, tearoff = 0)
+my_menu.add_cascade(label = "Remove", menu = remove_menu)
+remove_menu.add_command(label = "Remove Song", command = remove_song)
+remove_menu.add_command(label = "Clear list of songs", command = clear_fileList)
 
 root.mainloop()
