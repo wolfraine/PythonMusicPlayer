@@ -5,6 +5,7 @@ import time
 from tinytag import TinyTag
 import pygame
 from PIL import ImageTk, Image
+from idlelib.tooltip import Hovertip #ballontip lib
 
 # graphic 
 root = tk.Tk()
@@ -42,7 +43,7 @@ fileListButton.grid(row=1, column=0, columnspan=2)
 audioTagBox = tk.Listbox(masterFrame, fg="green")
 audioTagBox.grid(row=2, column=0, pady=20, padx=10)
 
-volumeFrame = tk.LabelFrame(masterFrame, text="Volume")
+volumeFrame = tk.LabelFrame(masterFrame)
 volumeFrame.grid(row=2, column=1)
 
 #create panel control button
@@ -110,7 +111,6 @@ def btn_next():
     fileListFrame.activate(next_file)
     fileListFrame.selection_set(next_file, last=None)
 
-
 def btn_prev():
     next_file = fileListFrame.curselection()
     next_file = next_file[0] - 1
@@ -157,7 +157,7 @@ def song_play_time():
         time_of_song = song_time(song)
         position_slider.config(to=int(time_of_song), value = int(current_position))
     
-    #pause for status bar
+    #pause for status bar leave it empty
     elif paused:
         pass
     
@@ -237,7 +237,7 @@ button_add.grid(row=0, column=0)
 button_remove.grid(row=0, column=1)
 
 #create volume slider
-volumeSlider = ttk.Scale(volumeFrame, from_=1, to=0, orient=VERTICAL, command=volume, length=45, value=1)
+volumeSlider = ttk.Scale(volumeFrame, from_=1, to=0, orient=VERTICAL, command=volume, length=55, value=1)
 volumeSlider.pack()
 
 #music position slider
@@ -250,7 +250,16 @@ sliderLabel.pack(fill=X, side=BOTTOM, ipady=2)
 
 status_bar = tk.Label(root, text='',border=1, relief=GROOVE)
 status_bar.pack(anchor=tk.E)
-
+#=================================================================================================================
+#tip part
+tip = Hovertip(button_play, 'Click to play song')
+tip = Hovertip(button_stop, 'Click to stop song')
+tip = Hovertip(button_pause, 'Click to pause/unpause song')
+tip = Hovertip(button_prev, 'Click to choose previous song')
+tip = Hovertip(button_next, 'Click to play next song')
+tip = Hovertip(button_add, 'Click to add files')
+tip = Hovertip(button_remove, 'Click to remove file')
+tip = Hovertip(volumeFrame, 'Move to change volume')
 #=================================================================================================================
 #                  MENU PART
 my_menu = tk.Menu(root)
